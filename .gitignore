@@ -1,0 +1,20 @@
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+
+# data, weights, personal recordings never committed (CLAUDE.md §9)
+data/
+models/
+*.joblib
+*.pt
+
+# results: only the curated final set is versioned
+results/*
+!results/final/
+
+web/node_modules/
+web/dist/

@@ -1,0 +1,166 @@
+# All thresholds, kernel sizes and paths. No magic numbers in code (CLAUDE.md §9).
+# Thresholds marked "tune" must be fitted on the validation split, never on test.
+seed: 1337
+
+paths:
+  data: data
+  raw: data/raw
+  synthetic: data/synthetic
+  own_capture: data/own_capture
+  models: models
+  results: results
+  lfw_home: data/raw/sklearn/lfw_home
+  midv: data/raw/midv2020
+
+models:
+  haar:  # OpenCV 5 wheels no longer bundle cv2.data.haarcascades
+    file: haarcascade_frontalface_default.xml
+    url: https://raw.githubusercontent.com/opencv/opencv/4.x/data/haarcascades/haarcascade_frontalface_default.xml
+  yunet:
+    file: face_detection_yunet_2023mar.onnx
+    url: https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx
+  sface:
+    file: face_recognition_sface_2021dec.onnx
+    url: https://github.com/opencv/opencv_zoo/raw/main/models/face_recognition_sface/face_recognition_sface_2021dec.onnx
+  face_landmarker:
+    file: face_landmarker.task
+    url: https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task
+  fusion: fusion_lr.joblib
+  liveness_lr: liveness_lr.joblib
+  liveness_cnn: liveness_cnn.pt
+
+quality:
+  blur_min: 15.0            # variance of Laplacian; ~95% of undegraded val captures (folds 0-6) pass each check
+  dark_frac_max: 0.25       # fraction of pixels in the bottom 2% of bins
+  bright_frac_max: 0.25     # fraction of pixels in the top 2% of bins
+  dynamic_range_min: 60     # p99 - p1 grey levels
+  extreme_bin_frac: 0.02    # "bottom/top 2% bins"
+  glare:
+    v_min: 250              # V > t_v: specular glare clips the sensor; pale card stock sits at 220-245
+    s_max: 40               # S < t_s
+    smooth_sigma: 2.0
+    min_area: 30            # bwareaopen
+    ratio_max: 0.30         # glare pixels / ROI pixels (val 95th pct of ordinary card captures: 0.29)
+  face_area_min: 0.02       # face box area / image area
+
+enhance:
+  stretch_pct: [1, 99]      # stretchlim
+  gamma: 0.7
+  clahe_clip: 2.0
+  clahe_tile: 8
+
+filters:
+  ksize: 3
+
+document:
+  canonical_width: 856      # px; ID-1 is 85.60 x 53.98 mm
+  aspect: 1.5858
+  work_width: 800           # resize input to this width before detection
+  blur_ksize: 5
+  canny: [50, 150]
+  edge_scale: 4             # Sobel/Prewitt: edge where mag^2 > scale * mean(mag^2) (MATLAB edge() default)
+  dilate_edges: 1
+  hough:
+    threshold: 60
+    min_line_frac: 0.15     # min line length as a fraction of image width
+    max_gap: 40
+    angle_tol_deg: 30       # near-horizontal: |angle| < tol; near-vertical: |angle| > 90 - tol
+    long_frac: 0.4          # a side = outermost segment >= this fraction of the longest (inner header bars are long too)
+    min_region_iou: 0.90    # a valid region blob vetoes Hough quads that disagree with it
+    refine_band_px: 3       # least-squares refit of each side on edge pixels within this distance
+  harris:
+    block: 2
+    ksize: 3
+    k: 0.04
+    snap_radius_frac: 0.03  # snap contour corner to strongest Harris response within this radius
+  validity:
+    aspect: [1.3, 1.9]
+    rectangularity_min: 0.85
+    solidity_min: 0.90
+    p2a: [14.5, 20.0]       # perimeter^2 / area; 16.8 for an ID-1 rectangle, 12.6 for a circle
+    min_area_frac: 0.10
+  color_edges: true         # OR of per-channel edge maps: grey conversion can erase chromatic boundaries
+  ocr:
+    enhance: stretch        # none | stretch | gamma | histeq | clahe   (picked on validation seeds)
+    denoise: median         # none | mean | gaussian | median
+    threshold: otsu         # otsu | adaptive_mean | adaptive_gaussian | none
+    adaptive_block: 31
+    adaptive_c: 10
+    morph: none             # none | open | close
+    morph_ksize: 2
+    upscale_height: 48      # resize each field ROI to this height before OCR
+    psm_field: 7
+    psm_full: 11
+    lang: eng
+  # Generic ID-1 layout for unknown cards: normalized (x, y, w, h) in the canonical warp.
+  layout:
+    portrait: [0.03, 0.18, 0.30, 0.62]
+    surname: [0.36, 0.18, 0.60, 0.11]
+    given_name: [0.36, 0.32, 0.60, 0.11]
+    birth_date: [0.36, 0.46, 0.40, 0.11]
+    id_number: [0.36, 0.60, 0.50, 0.11]
+    expiry_date: [0.36, 0.74, 0.40, 0.11]
+
+face:
+  detector: yunet           # haar | yunet
+  descriptor: sface         # geometric | sface
+  align: true
+  photometric: stretch_v    # none | stretch_v | gamma_v | histeq_v | clahe_v | histeq_rgb | clahe_rgb
+                            # val folds 0-6 EER: none/stretch_v/gamma_v 5.7%, clahe_v 7.1%; stretch also helps in low light (E4)
+  upscale_interp: bicubic   # nearest | bilinear | bicubic | lanczos
+  portrait_min_side: 160    # upscale ID portraits whose short side is below this
+  descreen_sigma: 1.5       # Gaussian low-pass retry when no face is found (halftone prints); 0 = off
+  yunet_score: 0.6
+  yunet_nms: 0.3
+  haar_scale: 1.1
+  haar_neighbors: 5
+  match_threshold: 0.24     # cosine; EER point on synthetic folds 0-6 (val), never test folds 7-9
+  geometric_threshold: -0.21  # negative euclidean; EER point on synthetic folds 0-6 (val)
+
+liveness:
+  max_frames: 90
+  frame_stride: 1
+  blur_ksize: 5
+  diff_threshold: 50        # E10 sweeps [30, 50, 70, 100]
+  diff_sweep: [30, 50, 70, 100]
+  min_blob: 20
+  ear_ratio: 0.75           # blink when EAR < ratio * median EAR
+  ear_consec: 2
+  band_scale: 1.8           # outer band = face box scaled by this
+  rules:                    # baseline man-made-cue rule classifier; tune
+    line_count_max: 6
+    hf_energy_max: 0.18
+    sat_std_min: 18
+  motion_ratio_min: 1.15    # eye/mouth motion vs whole-face motion; tune
+  live_threshold: 0.5
+  cnn:
+    arch: mobilenet_v3_small
+    img_size: 224
+    epochs: 8
+    batch: 32
+    lr: 0.0003
+
+fusion:
+  accept: 0.80
+  reject: 0.40
+  fixed:                    # baseline AND logic
+    face: 0.24
+    liveness: 0.5
+    ocr: 40.0
+
+degrade:
+  bits: [8, 6, 4, 3, 2, 1]
+  scales: [1.0, 0.5, 0.25, 0.125]
+  interps: [nearest, bilinear, bicubic, lanczos]
+  jpeg: [95, 75, 50, 30, 10]
+  # print-then-capture chain for synthetic doc portraits
+  print_capture:
+    halftone_cell: 4
+    perspective_max_shift: 0.06
+    glare_strength: 0.6
+    jpeg_quality: 50
+
+eval:
+  lfw_pairs: 1200           # pairs used by ablations (balanced, from the 10-fold file); 6000 = full
+  synthetic_pairs: 600
+  bootstrap: 1000

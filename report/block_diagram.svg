@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 380" font-family="Helvetica, Arial, sans-serif" font-size="12">
+  <title>eKYC pipeline: where the DIP operations sit</title>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#667085"/></marker>
+    <style>
+      .io{fill:#f2f4f7;stroke:#98a2b3}.dip{fill:#e6edfc;stroke:#2d5bd7}.ml{fill:#fdf0d5;stroke:#b7791f}.lg{fill:#e3f4e8;stroke:#157f3b}
+      .e{stroke:#667085;fill:none;marker-end:url(#a);stroke-width:1.3}.l{font-size:11px;font-weight:bold;fill:#475467;letter-spacing:1px}
+      text{fill:#101828}
+    </style>
+  </defs>
+  <rect width="1060" height="380" fill="#fff"/>
+  <!-- lanes -->
+  <text class="l" x="10" y="38">SELFIE</text>
+  <text class="l" x="10" y="128">LIVENESS</text>
+  <text class="l" x="10" y="218">ID IMAGE</text>
+  <text class="l" x="10" y="308">FIELD OCR</text>
+
+  <!-- selfie lane y=45 -->
+  <rect class="io" x="10" y="45" width="95" height="36" rx="7"/><text x="57" y="68" text-anchor="middle">Selfie / clip</text>
+  <rect class="dip" x="125" y="45" width="105" height="36" rx="7"/><text x="177" y="61" text-anchor="middle">Quality gate</text><text x="177" y="75" text-anchor="middle" font-size="10">Laplacian · hist · HSV</text>
+  <rect class="ml" x="250" y="45" width="105" height="36" rx="7"/><text x="302" y="68" text-anchor="middle">Detect (YuNet)</text>
+  <rect class="dip" x="375" y="45" width="120" height="36" rx="7"/><text x="435" y="61" text-anchor="middle">5-pt similarity</text><text x="435" y="75" text-anchor="middle" font-size="10">+ interpolation</text>
+  <rect class="dip" x="515" y="45" width="115" height="36" rx="7"/><text x="572" y="61" text-anchor="middle">HSV-V stretch</text><text x="572" y="75" text-anchor="middle" font-size="10">photometric norm</text>
+  <rect class="ml" x="650" y="45" width="115" height="36" rx="7"/><text x="707" y="68" text-anchor="middle">SFace embedding</text>
+  <path class="e" d="M105,63 L125,63"/><path class="e" d="M230,63 L250,63"/><path class="e" d="M355,63 L375,63"/><path class="e" d="M495,63 L515,63"/><path class="e" d="M630,63 L650,63"/>
+
+  <!-- liveness lane y=135 -->
+  <rect class="dip" x="125" y="135" width="140" height="36" rx="7"/><text x="195" y="151" text-anchor="middle">Frame diff + threshold</text><text x="195" y="165" text-anchor="middle" font-size="10">bwareaopen · imfill · masks</text>
+  <rect class="dip" x="285" y="135" width="110" height="36" rx="7"/><text x="340" y="158" text-anchor="middle">EAR blink</text>
+  <rect class="dip" x="415" y="135" width="150" height="36" rx="7"/><text x="490" y="151" text-anchor="middle">Man-made cues</text><text x="490" y="165" text-anchor="middle" font-size="10">Hough · entropy · FFT · HSV</text>
+  <rect class="ml" x="585" y="135" width="110" height="36" rx="7"/><text x="640" y="151" text-anchor="middle">CNN (opt.)</text><text x="640" y="165" text-anchor="middle" font-size="10">MobileNetV3-S</text>
+  <path class="e" d="M177,81 L177,135"/><path class="e" d="M265,153 L285,153"/><path class="e" d="M395,153 L415,153"/><path class="e" d="M565,153 L585,153"/>
+
+  <!-- id lane y=225 -->
+  <rect class="io" x="10" y="225" width="95" height="36" rx="7"/><text x="57" y="248" text-anchor="middle">ID photo</text>
+  <rect class="dip" x="125" y="225" width="105" height="36" rx="7"/><text x="177" y="248" text-anchor="middle">Quality gate</text>
+  <rect class="dip" x="250" y="225" width="105" height="36" rx="7"/><text x="302" y="241" text-anchor="middle">Colour edges</text><text x="302" y="255" text-anchor="middle" font-size="10">Sobel/Prewitt/Canny</text>
+  <rect class="dip" x="375" y="225" width="100" height="36" rx="7"/><text x="425" y="248" text-anchor="middle">Hough lines</text>
+  <rect class="dip" x="495" y="225" width="105" height="36" rx="7"/><text x="547" y="241" text-anchor="middle">Corners</text><text x="547" y="255" text-anchor="middle" font-size="10">∩ lines | Harris</text>
+  <rect class="dip" x="620" y="225" width="105" height="36" rx="7"/><text x="672" y="248" text-anchor="middle">Homography</text>
+  <rect class="dip" x="745" y="225" width="105" height="36" rx="7"/><text x="797" y="241" text-anchor="middle">Validity rules</text><text x="797" y="255" text-anchor="middle" font-size="10">regionprops</text>
+  <path class="e" d="M105,243 L125,243"/><path class="e" d="M230,243 L250,243"/><path class="e" d="M355,243 L375,243"/><path class="e" d="M475,243 L495,243"/><path class="e" d="M600,243 L620,243"/><path class="e" d="M725,243 L745,243"/>
+  <path class="e" d="M650,225 C650,200 405,205 405,180 L405,100 C405,88 435,92 435,81" stroke-dasharray="4 3"/><text x="420" y="196" font-size="10.5" fill="#475467">portrait crop (face detector on card)</text>
+
+  <!-- ocr lane y=315 -->
+  <rect class="io" x="375" y="315" width="95" height="36" rx="7"/><text x="422" y="338" text-anchor="middle">Field ROIs</text>
+  <rect class="dip" x="490" y="315" width="95" height="36" rx="7"/><text x="537" y="331" text-anchor="middle">Enhance</text><text x="537" y="345" text-anchor="middle" font-size="10">stretch/CLAHE</text>
+  <rect class="dip" x="605" y="315" width="95" height="36" rx="7"/><text x="652" y="331" text-anchor="middle">Denoise</text><text x="652" y="345" text-anchor="middle" font-size="10">mean/gauss/median</text>
+  <rect class="dip" x="720" y="315" width="95" height="36" rx="7"/><text x="767" y="331" text-anchor="middle">Threshold</text><text x="767" y="345" text-anchor="middle" font-size="10">Otsu/adaptive</text>
+  <rect class="dip" x="835" y="315" width="95" height="36" rx="7"/><text x="882" y="338" text-anchor="middle">Morphology</text>
+  <rect class="ml" x="950" y="315" width="95" height="36" rx="7"/><text x="997" y="338" text-anchor="middle">Tesseract</text>
+  <path class="e" d="M690,261 C690,290 422,290 422,315"/>
+  <path class="e" d="M470,333 L490,333"/><path class="e" d="M585,333 L605,333"/><path class="e" d="M700,333 L720,333"/><path class="e" d="M815,333 L835,333"/><path class="e" d="M930,333 L950,333"/>
+
+  <!-- fusion -->
+  <rect class="lg" x="900" y="115" width="140" height="36" rx="7"/><text x="970" y="131" text-anchor="middle">Fusion</text><text x="970" y="145" text-anchor="middle" font-size="10">AND rules → logistic reg.</text>
+  <rect class="lg" x="880" y="190" width="175" height="36" rx="7"/><text x="967" y="213" text-anchor="middle" font-weight="bold" font-size="11.5">ACCEPT / REVIEW / REJECT</text>
+  <path class="e" d="M765,63 C860,63 880,100 905,115"/><text x="790" y="92" font-size="10.5" fill="#475467">face_match_score</text>
+  <path class="e" d="M695,153 L900,138"/><text x="760" y="140" font-size="10.5" fill="#475467">liveness_score</text>
+  <path class="e" d="M1020,315 C1040,270 1040,170 1030,151"/><text x="1000" y="290" font-size="10.5" fill="#475467" text-anchor="end">ocr_conf</text>
+  <path class="e" d="M850,243 C875,235 885,170 905,151"/>
+  <path class="e" d="M970,151 L970,190"/>
+
+  <!-- legend -->
+  <rect class="dip" x="125" y="5" width="14" height="12" rx="3"/><text x="145" y="15">classical DIP stage</text>
+  <rect class="ml" x="270" y="5" width="14" height="12" rx="3"/><text x="290" y="15">learned model</text>
+  <rect class="io" x="390" y="5" width="14" height="12" rx="3"/><text x="410" y="15">input / ROI</text>
+  <rect class="lg" x="500" y="5" width="14" height="12" rx="3"/><text x="520" y="15">decision</text>
+</svg>

@@ -1,0 +1,19 @@
+module,kind,item,score,commit
+face,false reject,/Users/swarnimraj/dip-project/data/synthetic/pairs/00149_doc_portrait.png,-0.019200749695301056,uncommitted
+face,false reject,/Users/swarnimraj/dip-project/data/synthetic/pairs/00329_doc_portrait.png,0.08561483025550842,uncommitted
+face,false reject,/Users/swarnimraj/dip-project/data/synthetic/pairs/00325_doc_portrait.png,0.10482615232467651,uncommitted
+face,false reject,/Users/swarnimraj/dip-project/data/synthetic/pairs/00553_doc_portrait.png,0.11683419346809387,uncommitted
+face,false reject,/Users/swarnimraj/dip-project/data/synthetic/pairs/00201_doc_portrait.png,0.14146709442138672,uncommitted
+face,false reject,/Users/swarnimraj/dip-project/data/synthetic/pairs/00085_doc_portrait.png,0.14756432175636292,uncommitted
+face,false accept,/Users/swarnimraj/dip-project/data/synthetic/pairs/00155_doc_portrait.png,0.3149335980415344,uncommitted
+face,false accept,/Users/swarnimraj/dip-project/data/synthetic/pairs/00331_doc_portrait.png,0.3116496205329895,uncommitted
+face,false accept,/Users/swarnimraj/dip-project/data/synthetic/pairs/00397_doc_portrait.png,0.29774248600006104,uncommitted
+face,false accept,/Users/swarnimraj/dip-project/data/synthetic/pairs/00353_doc_portrait.png,0.2709016799926758,uncommitted
+face,false accept,/Users/swarnimraj/dip-project/data/synthetic/pairs/00394_doc_portrait.png,0.2609536647796631,uncommitted
+face,false accept,/Users/swarnimraj/dip-project/data/synthetic/pairs/00413_doc_portrait.png,0.26069945096969604,uncommitted
+document,worst IoU,00044,0.30194746827467434,uncommitted
+document,worst IoU,00019,0.8510880870814534,uncommitted
+document,worst IoU,00182,0.8515532857255041,uncommitted
+document,worst IoU,00115,0.8554474705663856,uncommitted
+document,worst IoU,00066,0.8557165582236999,uncommitted
+document,worst IoU,00286,0.8562163010630939,uncommitted
